@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toggle Ansible Execution</title>
+    <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+
+<script>
+
+function getIntervalDuration(option) {
+        switch (option) {
+            case '1min':
+                return 60000;
+            case '10min':
+                return 600000;
+            case '30min':
+                return 1800000;
+            case '1hr':
+                return 3600000;
+            case '12hr':
+                return 43200000;
+            case '24hr':
+                return 86400000;
+            default:
+                return -1;
+        }
+    }
+
+
+
+    async function setaInterval(){    
+      const intervalID = document.getElementById("intervalOption").value;
+      var interval = getIntervalDuration(intervalID);
+
+      anIntervalID = setInterval(toggleAnsible,interval);
+    }
+
+
+    async function toggleAnsible() {
+        var toggleSwitch = document.getElementById("ansibleToggle");
+        var executionStatus = document.getElementById("executionStatus");
+        var statusMessage = document.getElementById("statusMessage");
+
+        if (toggleSwitch.checked) {
+            // Implement logic to trigger Ansible playbook execution
+            executionStatus.textContent = "Enabled";
+            statusMessage.style.color = "green";
+            // Call the Flask API endpoint to start Ansible process
+
+            
+          //  interval = setInterval(() =>{
+                fetch('http://192.168.178.34:8080/api/start-ansible', {
+//              fetch('https://flask.youroldmangaming.com/api/start-ansible', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+              })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+             });
+         }    
+         else {
+            
+//            clearInterval(intervalId);
+            // Implement logic to disable Ansible playbook execution
+            executionStatus.textContent = "Disabled";
+            statusMessage.style.color = "red";
+            // Call the Flask API endpoint to stop Ansible process
+            fetch('http://192.168.178.34:8080/api/stop-ansible', {
+//            fetch('https://flask.youroldmangaming.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    }
+
+</script>
+
+
+
+
+
+<h2>Toggle Ansible Execution</h2>
+
+
+<br>
+<iframe src="http://192.168.178.152:3000/public-dashboards/67063f10707549b69e891c7d9af74a9a" width="650" height="400" frameborder="0"></iframe>
+<br>
+
+
+<label class="switch">
+<!--  <input id="ansibleToggle" type="checkbox" onchange="toggleAnsible()">-->
+  <input id="ansibleToggle" type="checkbox" onchange="setaInterval()">
+  <span class="slider"></span>
+</label>
+
+<p id="statusMessage">Ansible Execution: <span id="executionStatus">Disabled</span></p>
+
+
+<select id="intervalOption">
+    <option value="Once">Once</option>
+    <option value="1min">1min</option>
+    <option value="10min">10min</option>
+    <option value="30min">30min</option>
+    <option value="1hr">1hr</option>
+    <option value="12hr">12hr</option>
+    <option value="24hr">24hr</option>
+</select>
+
+
+</body>
+</html>
