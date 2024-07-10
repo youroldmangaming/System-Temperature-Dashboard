@@ -1,0 +1,27 @@
+- name: Gather and Send System Temperature to InfluxDB
+  vars_files:
+    - config.yml  # Include your configuration file
+  hosts: localhost  # Assuming gathering temperature locally
+  tasks:
+    - name: Install influxdb-client Python library
+      pip:
+        name: influxdb-client
+        state: present
+      become: yes  # Ensure you have the necessary permissions to install the library
+
+    - name: Check system temperature
+      shell: "sensors | grep 'Core 0' | awk '{print $3}' | tr -d '+      C'"
+      register: temperature
+      changed_when: false
+
+    - name: Write temperature to InfluxDB
+      shell: |
+         python3 influx.py  "{{ temperature.stdout }}"
+      args:
+        executable: /bin/bash
+      register: influx_result
+      changed_when: false
+
+    - name: Display temperature
+      debug:
+        msg: "System temperature sent to InfluxDB: {{ temperature.stdout }}"
